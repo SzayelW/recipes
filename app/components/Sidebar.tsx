@@ -1,6 +1,11 @@
-import { Form, useSearchParams, useSubmit } from "react-router";
+import { Form, useSearchParams, useSubmit, Link } from "react-router";
 
-const RESOURCE_TYPES = ["Articles", "Code Snippets", "Learning Resources"];
+const RESOURCE_FILTERS = [
+    { label: "Articles", value: "Article" },
+    { label: "Code Snippets", value: "Code Snippet" },
+    { label: "Learning Resources", value: "Course" },
+];
+
 const TAGS = [
     "Advanced",
     "Book",
@@ -28,10 +33,23 @@ export function Sidebar({ className = "" }: { className?: string }) {
     const currentTypes = searchParams.getAll("type");
     const currentTags = searchParams.getAll("tag");
 
+    const hasFilters = currentTypes.length > 0 || currentTags.length > 0;
+    const q = searchParams.get("q") || "";
+
     return (
         <aside className={`w-64 shrink-0 space-y-8 py-8 ${className}`}>
             <div>
-                <h3 className="text-lg font-bold mb-4">Filters</h3>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Filters</h3>
+                    {hasFilters && (
+                        <Link
+                            to={`/?q=${q}`}
+                            className="text-sm text-gray-500 underline hover:text-black transition-colors"
+                        >
+                            Reset filters
+                        </Link>
+                    )}
+                </div>
                 <div className="space-y-4">
                     <div>
                         <h4 className="text-sm font-medium text-gray-500 mb-2">Resource Type</h4>
@@ -40,27 +58,31 @@ export function Sidebar({ className = "" }: { className?: string }) {
                             {currentTags.map(t => <input key={t} type="hidden" name="tag" value={t} />)}
                             <input type="hidden" name="q" value={searchParams.get("q") || ""} />
 
-                            {RESOURCE_TYPES.map((type) => (
-                                <label key={type} className="flex items-center gap-2 cursor-pointer group">
-                                    <div className="relative flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            name="type"
-                                            value={type}
-                                            defaultChecked={currentTypes.includes(type)}
-                                            className="peer h-4 w-4 appearance-none rounded border border-gray-300 checked:bg-black checked:border-black transition-all"
-                                        />
-                                        <svg
-                                            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100"
-                                            viewBox="0 0 14 14"
-                                            fill="none"
-                                        >
-                                            <path d="M3 8L6 11L11 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <span className="text-sm text-gray-600 group-hover:text-black transition-colors">{type}</span>
-                                </label>
-                            ))}
+                            {RESOURCE_FILTERS.map((filter) => {
+                                const isChecked = currentTypes.includes(filter.value);
+                                return (
+                                    <label key={filter.value} className="flex items-center gap-2 cursor-pointer group">
+                                        <div className="relative flex items-center">
+                                            <input
+                                                key={`${filter.value}-${isChecked}`} // Force re-mount on state change to respect defaultChecked
+                                                type="checkbox"
+                                                name="type"
+                                                value={filter.value}
+                                                defaultChecked={isChecked}
+                                                className="peer h-4 w-4 appearance-none rounded border border-gray-300 checked:bg-black checked:border-black transition-all"
+                                            />
+                                            <svg
+                                                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100"
+                                                viewBox="0 0 14 14"
+                                                fill="none"
+                                            >
+                                                <path d="M3 8L6 11L11 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-sm text-gray-600 group-hover:text-black transition-colors">{filter.label}</span>
+                                    </label>
+                                );
+                            })}
                         </Form>
                     </div>
                 </div>
@@ -83,16 +105,16 @@ export function Sidebar({ className = "" }: { className?: string }) {
                         newTags.forEach(t => params.append("tag", t));
 
                         return (
-                            <a
+                            <Link
                                 key={tag}
-                                href={`/?${params.toString()}`}
+                                to={`/?${params.toString()}`}
                                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${isActive
                                     ? "bg-black text-white border-black"
                                     : "border-gray-200 text-gray-600 hover:border-gray-400"
                                     }`}
                             >
                                 {tag}
-                            </a>
+                            </Link>
                         );
                     })}
                 </div>
