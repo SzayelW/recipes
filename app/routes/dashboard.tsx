@@ -1,5 +1,5 @@
 import type { Route } from "./+types/dashboard";
-import { Form, redirect, useLoaderData } from "react-router";
+import { Form, redirect, useLoaderData, useNavigation } from "react-router";
 import { getSession, destroySession } from "../sessions";
 import jwt from "jsonwebtoken";
 import { db } from "../db";
@@ -8,8 +8,10 @@ import { eq, like, and, or } from "drizzle-orm";
 import { Header } from "../components/Header";
 import { Sidebar } from "../components/Sidebar";
 import { ResourceCard, type Resource } from "../components/ResourceCard";
+import { ResourceForm } from "../components/ResourceForm";
+import { DeleteConfirmationDialog } from "../components/DeleteConfirmationDialog";
 import { Search, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function meta({ }: Route.MetaArgs) {
     return [{ title: "Discover Resources - Method Knowledge Hub" }];
@@ -24,9 +26,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     let userEmail = "";
+    let userId = 0;
     try {
-        const payload = jwt.verify(token, process.env.SESSION_SECRET || "s3cr3t") as { email: string };
+        const payload = jwt.verify(token, process.env.SESSION_SECRET || "s3cr3t") as { email: string, userId: number };
         userEmail = payload.email;
+        userId = payload.userId;
     } catch (error) {
         throw redirect("/login", {
             headers: { "Set-Cookie": await destroySession(session) },
@@ -48,8 +52,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     if (types.length > 0) {
-        // Simple OR for types. In a real app with exact string matching this is cleaner.
-        // Since seed has "Article", "Code Snippet", we need to match carefully or use ILIKE/lower (sqlite 'like' is case insens usually)
         const typeFilters = types.map(t => like(resources.type, `%${t}%`));
         filters.push(or(...typeFilters));
     }
@@ -59,29 +61,76 @@ export async function loader({ request }: Route.LoaderArgs) {
         filters.push(or(...tagFilters));
     }
 
-    // Apply all filters with AND
     if (filters.length > 0) {
-        // @ts-ignore - drizzle dynamic query types can be tricky
+        // @ts-ignore
         query = query.where(and(...filters));
     }
 
     const result = await query;
 
-    // Transform for UI (parse tags)
     const formattedResources: Resource[] = result.map(r => ({
         ...r,
         tags: JSON.parse(r.tags),
         createdAt: r.createdAt?.toISOString() || new Date().toISOString(),
-        authorId: r.authorId ?? 0 // Handle nullable authorId
+        authorId: r.authorId ?? 0,
+        codeSnippet: r.codeSnippet
     }));
 
-    return { userEmail, resources: formattedResources, q };
+    return { userEmail, userId, resources: formattedResources, q };
 }
 
 export async function action({ request }: Route.ActionArgs) {
-    // Logout action handled in Header normally, but if we need dashboard specific actions:
+    const session = await getSession(request.headers.get("Cookie"));
+    const token = session.get("token");
+    if (!token) return redirect("/login");
+
+    let userId = 0;
+    try {
+        const payload = jwt.verify(token, process.env.SESSION_SECRET || "s3cr3t") as { userId: number };
+        userId = payload.userId;
+    } catch {
+        return redirect("/login");
+    }
+
     const formData = await request.formData();
-    // Stub for future
+    const intent = formData.get("intent");
+
+    if (intent === "delete") {
+        const id = parseInt(formData.get("id") as string);
+        if (id) {
+            await db.delete(resources).where(eq(resources.id, id));
+        }
+        return null;
+    }
+
+    if (intent === "create" || intent === "update") {
+        const title = formData.get("title") as string;
+        const description = formData.get("description") as string;
+        const type = formData.get("type") as string;
+        const tags = formData.get("tags") as string; // JSON string
+        const link = (formData.get("link") as string) || "#";
+        const codeSnippet = (formData.get("code_snippet") as string) || null;
+
+        const data = {
+            title,
+            description,
+            type,
+            tags,
+            link,
+            codeSnippet,
+            authorId: userId
+        };
+
+        if (intent === "create") {
+            await db.insert(resources).values(data);
+        } else {
+            const id = parseInt(formData.get("id") as string);
+            if (id) {
+                await db.update(resources).set(data).where(eq(resources.id, id));
+            }
+        }
+    }
+
     return null;
 }
 
@@ -89,9 +138,69 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
     const { userEmail, resources, q } = loaderData;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+    // Form State
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingResource, setEditingResource] = useState<Resource | null>(null);
+
+    // Delete Dialog State
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [resourceToDelete, setResourceToDelete] = useState<number | null>(null);
+
+    const navigation = useNavigation();
+
+    // Close form/dialog on successful navigation (submission)
+    useEffect(() => {
+        if (navigation.state === "loading") {
+            if (isFormOpen) {
+                setIsFormOpen(false);
+                setEditingResource(null);
+            }
+            if (isDeleteDialogOpen) {
+                setIsDeleteDialogOpen(false);
+                setResourceToDelete(null);
+            }
+        }
+    }, [navigation.state]);
+
+    const handleShareClick = () => {
+        setEditingResource(null);
+        setIsFormOpen(true);
+    };
+
+    const handleEditClick = (resource: Resource) => {
+        setEditingResource(resource);
+        setIsFormOpen(true);
+    };
+
+    const handleDeleteClick = (id: number) => {
+        setResourceToDelete(id);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const closeForm = () => {
+        setIsFormOpen(false);
+        setEditingResource(null);
+    };
+
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50 text-black font-sans">
-            <Header userEmail={userEmail} onMenuClick={() => setIsMobileMenuOpen(true)} />
+        <div className="flex flex-col min-h-screen bg-gray-50 text-black font-sans relative">
+            <Header
+                userEmail={userEmail}
+                onMenuClick={() => setIsMobileMenuOpen(true)}
+                onShareClick={handleShareClick}
+            />
+
+            <ResourceForm
+                isOpen={isFormOpen}
+                onClose={closeForm}
+                initialData={editingResource}
+            />
+
+            <DeleteConfirmationDialog
+                isOpen={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                resourceId={resourceToDelete}
+            />
 
             <div className="flex flex-1 container mx-auto px-6 gap-12 relative">
                 {/* Desktop Sidebar */}
@@ -145,7 +254,12 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {resources.map(resource => (
-                                <ResourceCard key={resource.id} resource={resource} />
+                                <ResourceCard
+                                    key={resource.id}
+                                    resource={resource}
+                                    onEdit={handleEditClick}
+                                    onDelete={handleDeleteClick}
+                                />
                             ))}
                         </div>
 

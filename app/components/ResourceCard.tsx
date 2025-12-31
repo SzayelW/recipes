@@ -8,6 +8,7 @@ export interface Resource {
     type: string;
     tags: string[]; // parsed JSON
     link: string;
+    codeSnippet?: string | null;
     authorId: number;
     createdAt: string; // ISO string from serializer
 }
@@ -21,7 +22,7 @@ const TypeIcon = ({ type }: { type: string }) => {
     return <FileText className="h-4 w-4" />;
 };
 
-export function ResourceCard({ resource }: { resource: Resource }) {
+export function ResourceCard({ resource, onEdit, onDelete }: { resource: Resource; onEdit?: (r: Resource) => void; onDelete?: (id: number) => void }) {
     return (
         <div className="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-6 transition-all hover:shadow-md hover:border-gray-300">
             <div className="flex items-start justify-between mb-4">
@@ -31,14 +32,12 @@ export function ResourceCard({ resource }: { resource: Resource }) {
                 </div>
 
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="text-gray-400 hover:text-black">
+                    <button onClick={() => onEdit?.(resource)} className="text-gray-400 hover:text-black">
                         <Edit2 className="h-4 w-4" />
                     </button>
-                    <Form method="post" action={`/resources/${resource.id}/delete`}>
-                        <button type="submit" className="text-gray-400 hover:text-red-600">
-                            <Trash2 className="h-4 w-4" />
-                        </button>
-                    </Form>
+                    <button onClick={() => onDelete?.(resource.id)} className="text-gray-400 hover:text-red-600">
+                        <Trash2 className="h-4 w-4" />
+                    </button>
                 </div>
             </div>
 

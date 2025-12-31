@@ -1,7 +1,7 @@
 import { Link, Form } from "react-router";
 import { User, LogOut, Menu } from "lucide-react";
 
-export function Header({ userEmail, onMenuClick }: { userEmail: string; onMenuClick?: () => void }) {
+export function Header({ userEmail, onMenuClick, onShareClick }: { userEmail: string; onMenuClick?: () => void; onShareClick?: () => void }) {
     return (
         <header className="flex h-16 items-center justify-between border-b border-gray-200 px-6 bg-white shrink-0 sticky top-0 z-40">
             <div className="flex items-center gap-4">
@@ -31,7 +31,10 @@ export function Header({ userEmail, onMenuClick }: { userEmail: string; onMenuCl
             </div>
 
             <div className="flex items-center gap-4">
-                <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
+                <button
+                    onClick={onShareClick}
+                    className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+                >
                     Share Resource
                 </button>
 
