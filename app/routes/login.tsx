@@ -1,5 +1,5 @@
 import type { Route } from "./+types/login";
-import { Form, redirect, useActionData } from "react-router";
+import { Form, redirect, useActionData, Link } from "react-router";
 import { db } from "../db";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -138,7 +138,7 @@ export default function Login() {
           </Form>
 
           <div className="mt-6 text-center text-xs text-gray-600">
-            Don't have an account? <a href="#" className="font-semibold text-gray-900 hover:underline">Sign up</a>
+            Don't have an account? <Link to="/signup" className="font-semibold text-gray-900 hover:underline">Sign up</Link>
           </div>
         </div>
 
