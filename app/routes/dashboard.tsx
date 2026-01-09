@@ -183,7 +183,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50 text-black font-sans relative">
+        <div className="flex flex-col h-screen overflow-hidden bg-gray-50 text-black font-sans relative">
             <Header
                 userEmail={userEmail}
                 onMenuClick={() => setIsMobileMenuOpen(true)}
@@ -202,7 +202,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                 resourceId={resourceToDelete}
             />
 
-            <div className="flex flex-1 container mx-auto px-6 gap-12 relative">
+            <div className="flex flex-1 container mx-auto px-6 gap-12 relative overflow-hidden">
                 {/* Desktop Sidebar */}
                 <Sidebar className="hidden lg:block" />
 
@@ -225,8 +225,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                     </div>
                 )}
 
-                <main className="flex-1 py-8 space-y-8">
-                    <section className="space-y-4">
+                <main className="flex-1 flex flex-col h-full overflow-hidden py-8">
+                    <section className="space-y-4 shrink-0 mb-6">
                         <h1 className="text-3xl font-bold tracking-tight">Discover Resources</h1>
                         <p className="text-gray-500 max-w-2xl">
                             Explore shared knowledge from our community
@@ -247,11 +247,11 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                         </div>
                     </section>
 
-                    <section>
-                        <div className="mb-4 text-sm text-gray-500 font-medium">
-                            {resources.length} resources found
-                        </div>
+                    <div className="mb-4 text-sm text-gray-500 font-medium shrink-0">
+                        {resources.length} resources found
+                    </div>
 
+                    <div className="flex-1 overflow-y-auto min-h-0 pb-20">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {resources.map(resource => (
                                 <ResourceCard
@@ -268,7 +268,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                 No resources found matching your criteria.
                             </div>
                         )}
-                    </section>
+                    </div>
                 </main>
             </div>
         </div>
