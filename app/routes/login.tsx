@@ -1,11 +1,11 @@
 import type { Route } from "./+types/login";
 import { Form, redirect, useActionData, Link } from "react-router";
-import { db } from "../db";
+import { db } from "../db/index.server";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { commitSession, getSession } from "../sessions";
+import { commitSession, getSession } from "../sessions.server";
 
 export function meta({ }: Route.MetaArgs) {
   return [

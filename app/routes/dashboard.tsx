@@ -1,8 +1,8 @@
 import type { Route } from "./+types/dashboard";
 import { Form, redirect, useLoaderData, useNavigation } from "react-router";
-import { getSession, destroySession } from "../sessions";
+import { getSession, destroySession } from "../sessions.server";
 import jwt from "jsonwebtoken";
-import { db } from "../db";
+import { db } from "../db/index.server";
 import { resources } from "../db/schema";
 import { eq, like, and, or } from "drizzle-orm";
 import { Header } from "../components/Header";

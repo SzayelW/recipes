@@ -1,6 +1,6 @@
 import type { Route } from "./+types/logout";
 import { redirect } from "react-router";
-import { destroySession, getSession } from "../sessions";
+import { destroySession, getSession } from "../sessions.server";
 
 export async function action({ request }: Route.ActionArgs) {
     const session = await getSession(request.headers.get("Cookie"));

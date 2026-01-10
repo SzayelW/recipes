@@ -1,6 +1,6 @@
 import type { Route } from "./+types/signup";
 import { Form, redirect, useActionData, Link } from "react-router";
-import { db } from "../db";
+import { db } from "../db/index.server";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -37,15 +37,23 @@ export async function action({ request }: Route.ActionArgs) {
 
     // Hash password & Create User
     const hashedPassword = await bcrypt.hash(password, 10);
+    const username = email.split("@")[0] + "_" + Math.floor(Math.random() * 1000);
 
-    await db.insert(users).values({
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-    });
+    try {
+        await db.insert(users).values({
+            email,
+            password: hashedPassword,
+            firstName,
+            lastName,
+            username
+        });
+    } catch (e: any) {
+        // Fallback or error handling for specific constraints if needed
+        throw e;
+    }
 
     return redirect("/login");
+
 }
 
 export default function Signup() {

@@ -1,4 +1,4 @@
-import { db } from "./app/db";
+import { db } from "./app/db/index.server";
 import { users, resources } from "./app/db/schema";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -8,15 +8,18 @@ async function seed() {
 
     // Seed Admin
     let adminId: number;
-    const existingAdmin = await db.select().from(users).where(eq(users.email, "admin")).get();
+    const existingAdmin = await db.select().from(users).where(eq(users.email, "admin@method.com")).get();
 
     if (!existingAdmin) {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash("admin", salt);
 
         const result = await db.insert(users).values({
-            email: "admin",
+            email: "admin@method.com",
+            username: "admin",
             password: passwordHash,
+            firstName: "Admin",
+            lastName: "User",
         }).returning({ id: users.id }).get();
 
         adminId = result.id;
