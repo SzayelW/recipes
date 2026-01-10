@@ -99,6 +99,23 @@ describe("Dashboard Route", () => {
                 .rejects
                 .toThrow(); // Redirect throws a 302 response
         });
+        it("filters resources by search query", async () => {
+            const request = new Request("http://localhost:3000/?q=react");
+            await loader({ request, params: {}, context: {} } as any);
+            expect(mockDb.chain.where).toHaveBeenCalled();
+        });
+
+        it("filters resources by type", async () => {
+            const request = new Request("http://localhost:3000/?type=blog");
+            await loader({ request, params: {}, context: {} } as any);
+            expect(mockDb.chain.where).toHaveBeenCalled();
+        });
+
+        it("filters resources by tag", async () => {
+            const request = new Request("http://localhost:3000/?tag=javascript");
+            await loader({ request, params: {}, context: {} } as any);
+            expect(mockDb.chain.where).toHaveBeenCalled();
+        });
     });
 
     describe("action", () => {
