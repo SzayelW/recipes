@@ -72,9 +72,11 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
                         <input type="hidden" name="tags" value={JSON.stringify(tags)} />
 
                         <div className="space-y-2">
+                            <label htmlFor="type" className="text-sm font-semibold text-gray-900">Type</label>
                             <div className="relative">
                                 <select
                                     name="type"
+                                    id="type"
                                     className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
                                     value={resourceType}
                                     onChange={(e) => setResourceType(e.target.value)}
@@ -92,10 +94,11 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-900">Title</label>
+                            <label htmlFor="title" className="text-sm font-semibold text-gray-900">Title</label>
                             <input
                                 type="text"
                                 name="title"
+                                id="title"
                                 defaultValue={initialData?.title}
                                 placeholder="Enter a descriptive title"
                                 className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-gray-400"
@@ -104,9 +107,10 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-900">Description</label>
+                            <label htmlFor="description" className="text-sm font-semibold text-gray-900">Description</label>
                             <textarea
                                 name="description"
+                                id="description"
                                 defaultValue={initialData?.description}
                                 placeholder="Provide a detailed description"
                                 className="w-full h-32 rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-gray-400 resize-none"
@@ -115,7 +119,7 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-900">Tags</label>
+                            <label htmlFor="tags" className="text-sm font-semibold text-gray-900">Tags</label>
                             <div className="flex flex-wrap gap-2 mb-2">
                                 {tags.map(tag => (
                                     <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium">
@@ -128,6 +132,7 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
                             </div>
                             <input
                                 type="text"
+                                id="tags"
                                 value={tagInput}
                                 onChange={(e) => setTagInput(e.target.value)}
                                 onKeyDown={handleTagKeyDown}
@@ -138,10 +143,11 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
 
                         {(resourceType === "Article" || resourceType === "Learning Resource" || resourceType === "Course") && (
                             <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                <label className="text-sm font-semibold text-gray-900">URL</label>
+                                <label htmlFor="link" className="text-sm font-semibold text-gray-900">URL</label>
                                 <input
                                     type="url"
                                     name="link"
+                                    id="link"
                                     defaultValue={initialData?.link}
                                     placeholder="https://..."
                                     className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-gray-400"
@@ -152,9 +158,10 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
 
                         {resourceType === "Code Snippet" && (
                             <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                <label className="text-sm font-semibold text-gray-900">Code Snippet</label>
+                                <label htmlFor="code_snippet" className="text-sm font-semibold text-gray-900">Code Snippet</label>
                                 <textarea
                                     name="code_snippet"
+                                    id="code_snippet"
                                     defaultValue={initialData?.codeSnippet || ""}
                                     placeholder="// Paste your code here..."
                                     className="w-full h-48 font-mono rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-gray-400 resize-none bg-gray-50"
