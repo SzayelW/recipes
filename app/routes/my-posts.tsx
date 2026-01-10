@@ -1,5 +1,6 @@
 import type { Route } from "./+types/my-posts";
-import { Form, redirect, useLoaderData, useNavigation, Link } from "react-router";
+import { highlightCode } from "../utils/highlighter.server";
+import { redirect, useNavigation, Link } from "react-router";
 import { getSession, destroySession } from "../sessions.server";
 import jwt from "jsonwebtoken";
 import { db } from "../db/index.server";
@@ -38,12 +39,21 @@ export async function loader({ request }: Route.LoaderArgs) {
     // Fetch User's Resources
     const result = await db.select().from(resources).where(eq(resources.authorId, userId)).orderBy(desc(resources.createdAt));
 
-    const formattedResources: Resource[] = result.map(r => ({
-        ...r,
-        tags: JSON.parse(r.tags),
-        createdAt: r.createdAt?.toISOString() || new Date().toISOString(),
-        authorId: r.authorId ?? 0,
-        codeSnippet: r.codeSnippet
+    const formattedResources: Resource[] = await Promise.all(result.map(async r => {
+        let highlightedCode = null;
+        if (r.codeSnippet) {
+            const { html } = await highlightCode(r.codeSnippet);
+            highlightedCode = html;
+        }
+
+        return {
+            ...r,
+            tags: JSON.parse(r.tags),
+            createdAt: r.createdAt?.toISOString() || new Date().toISOString(),
+            authorId: r.authorId ?? 0,
+            codeSnippet: r.codeSnippet,
+            highlightedCode
+        };
     }));
 
     return { userEmail, userId, resources: formattedResources };

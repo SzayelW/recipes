@@ -9,6 +9,7 @@ export interface Resource {
     tags: string[]; // parsed JSON
     link: string;
     codeSnippet?: string | null;
+    highlightedCode?: string | null;
     authorId: number;
     createdAt: string; // ISO string from serializer
 }
@@ -32,10 +33,10 @@ export function ResourceCard({ resource, onEdit, onDelete }: { resource: Resourc
                 </div>
 
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => onEdit?.(resource)} className="text-gray-400 hover:text-black">
+                    <button onClick={() => onEdit?.(resource)} className="text-gray-400 hover:text-black" aria-label="Edit resource">
                         <Edit2 className="h-4 w-4" />
                     </button>
-                    <button onClick={() => onDelete?.(resource.id)} className="text-gray-400 hover:text-red-600">
+                    <button onClick={() => onDelete?.(resource.id)} className="text-gray-400 hover:text-red-600" aria-label="Delete resource">
                         <Trash2 className="h-4 w-4" />
                     </button>
                 </div>
@@ -44,10 +45,18 @@ export function ResourceCard({ resource, onEdit, onDelete }: { resource: Resourc
             <h3 className="text-lg font-bold text-gray-900 mb-2">{resource.title}</h3>
             <p className="text-sm text-gray-500 mb-4 line-clamp-2">{resource.description}</p>
 
-            <a href={resource.link} className="flex items-center gap-1 font-semibold text-sm underline-offset-4 hover:underline mb-6">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
-                View {resource.type.toLowerCase().split(' ')[0]}
-            </a>
+            {resource.highlightedCode ? (
+                <div
+                    className="mb-6 rounded-md overflow-hidden bg-[#0d1117] border border-gray-800 text-xs"
+                    dangerouslySetInnerHTML={{ __html: resource.highlightedCode }}
+                    style={{ maxHeight: '200px', overflowY: 'auto' }}
+                />
+            ) : (
+                <a href={resource.link} className="flex items-center gap-1 font-semibold text-sm underline-offset-4 hover:underline mb-6">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
+                    View {resource.type.toLowerCase().split(' ')[0]}
+                </a>
+            )}
 
             <div className="mt-auto flex flex-wrap gap-2 mb-6">
                 {resource.tags.map(tag => (

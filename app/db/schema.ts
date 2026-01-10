@@ -17,6 +17,7 @@ export const resources = sqliteTable("resources", {
     tags: text("tags").notNull(), // JSON string: '["React", "Hooks"]'
     link: text("link").notNull(),
     codeSnippet: text("code_snippet"),
+    language: text("language").default("text"),
     authorId: integer("author_id").references(() => users.id),
     createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });

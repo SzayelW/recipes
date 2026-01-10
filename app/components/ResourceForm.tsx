@@ -163,7 +163,7 @@ export function ResourceForm({ isOpen, onClose, initialData }: ResourceFormProps
                                     name="code_snippet"
                                     id="code_snippet"
                                     defaultValue={initialData?.codeSnippet || ""}
-                                    placeholder="// Paste your code here..."
+                                    placeholder={`\`\`\`javascript\n// your code here\n\`\`\``}
                                     className="w-full h-48 font-mono rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-gray-400 resize-none bg-gray-50"
                                 />
                             </div>

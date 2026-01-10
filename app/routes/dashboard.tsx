@@ -1,5 +1,6 @@
 import type { Route } from "./+types/dashboard";
-import { Form, redirect, useLoaderData, useNavigation } from "react-router";
+import { highlightCode, detectLanguage } from "../utils/highlighter.server";
+import { Form, redirect, useNavigation } from "react-router";
 import { getSession, destroySession } from "../sessions.server";
 import jwt from "jsonwebtoken";
 import { db } from "../db/index.server";
@@ -68,12 +69,25 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     const result = await query;
 
-    const formattedResources: Resource[] = result.map(r => ({
-        ...r,
-        tags: JSON.parse(r.tags),
-        createdAt: r.createdAt?.toISOString() || new Date().toISOString(),
-        authorId: r.authorId ?? 0,
-        codeSnippet: r.codeSnippet
+    // Process highlighting for each resource on the server
+    const formattedResources: Resource[] = await Promise.all(result.map(async r => {
+        let highlightedCode = null;
+        if (r.codeSnippet) {
+            // If already has stored language, we could use it, but for now we re-parse 
+            // to ensure the markdown fence is respected or if we migrate.
+            // Actually, let's just use the helper which handles "text" fallback.
+            const { html } = await highlightCode(r.codeSnippet);
+            highlightedCode = html;
+        }
+
+        return {
+            ...r,
+            tags: JSON.parse(r.tags),
+            createdAt: r.createdAt?.toISOString() || new Date().toISOString(),
+            authorId: r.authorId ?? 0,
+            codeSnippet: r.codeSnippet,
+            highlightedCode // Pass this to the frontend
+        };
     }));
 
     return { userEmail, userId, resources: formattedResources, q };
@@ -111,6 +125,13 @@ export async function action({ request }: Route.ActionArgs) {
         const link = (formData.get("link") as string) || "#";
         const codeSnippet = (formData.get("code_snippet") as string) || null;
 
+        // Extract language from snippet to save it
+        let language = "text";
+        if (codeSnippet) {
+            const { language: detectedLang } = detectLanguage(codeSnippet);
+            language = detectedLang;
+        }
+
         const data = {
             title,
             description,
@@ -118,6 +139,7 @@ export async function action({ request }: Route.ActionArgs) {
             tags,
             link,
             codeSnippet,
+            language, // Save the detected language
             authorId: userId
         };
 
