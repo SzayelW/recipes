@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 import { Header } from "../components/Header";
 
 export function meta({ }: Route.MetaArgs) {
-    return [{ title: "My Profile - Method Knowledge Hub" }];
+    return [{ title: "My Profile - Enki's resources" }];
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

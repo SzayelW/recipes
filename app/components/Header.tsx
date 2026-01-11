@@ -23,24 +23,16 @@ export function Header({ userEmail, onMenuClick, onShareClick }: { userEmail: st
                     <Menu className="h-6 w-6" />
                 </button>
 
-                <div className="flex items-center gap-2">
-                    {/* Icon mimicking the 'Method' logo */}
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                        </svg>
+                <div className="flex items-center gap-2 group">
+                    {/* Character logo */}
+                    <div className="flex h-8 w-8 items-center justify-center shrink-0">
+                        <img
+                            src="/logo.png"
+                            alt="Enki Logo"
+                            className="h-full w-full object-contain rounded-lg shadow-sm"
+                        />
                     </div>
-                    <Link to="/" className="text-lg font-bold tracking-tight">Method Knowledge Hub</Link>
+                    <Link to="/" className="text-lg font-bold tracking-tight">Enki's resources</Link>
                 </div>
             </div>
 

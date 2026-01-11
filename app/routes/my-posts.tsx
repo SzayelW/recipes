@@ -13,7 +13,7 @@ import { DeleteConfirmationDialog } from "../components/DeleteConfirmationDialog
 import { useState, useEffect } from "react";
 
 export function meta({ }: Route.MetaArgs) {
-    return [{ title: "My Posts - Method Knowledge Hub" }];
+    return [{ title: "My Posts - Enki's resources" }];
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

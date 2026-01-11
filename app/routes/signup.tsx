@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 
 export function meta({ }: Route.MetaArgs) {
     return [
-        { title: "Sign Up - Recipes" },
+        { title: "Sign Up - Enki's resources" },
         { name: "description", content: "Create a new account" },
     ];
 }
@@ -66,20 +66,8 @@ export default function Signup() {
                 {/* Header Section */}
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-6">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white shadow-lg">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                            </svg>
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg overflow-hidden border border-gray-100">
+                            <img src="/logo.png" alt="Enki Logo" className="w-full h-full object-contain" />
                         </div>
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight mb-2">Create an account</h1>

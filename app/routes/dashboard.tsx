@@ -15,7 +15,7 @@ import { Search, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export function meta({ }: Route.MetaArgs) {
-    return [{ title: "Discover Resources - Method Knowledge Hub" }];
+    return [{ title: "Discover Resources - Enki's resources" }];
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
