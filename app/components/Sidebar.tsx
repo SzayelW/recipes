@@ -1,4 +1,4 @@
-import { Form, useSearchParams, useSubmit, Link } from "react-router";
+import { Form, useSearchParams, useSubmit, Link, useNavigation } from "react-router";
 
 const RESOURCE_FILTERS = [
     { label: "Articles", value: "Article" },
@@ -25,16 +25,26 @@ const TAGS = [
 export function Sidebar({ className = "" }: { className?: string }) {
     const [searchParams] = useSearchParams();
     const submit = useSubmit();
+    const navigation = useNavigation();
+
+    // Determine optimistic state
+    const isNavigationSearch =
+        navigation.state !== "idle" &&
+        navigation.location.pathname === "/";
+
+    const displayParams = isNavigationSearch
+        ? new URLSearchParams(navigation.location.search)
+        : searchParams;
 
     const handleFilterChange = (event: React.FormEvent<HTMLFormElement>) => {
         submit(event.currentTarget);
     };
 
-    const currentTypes = searchParams.getAll("type");
-    const currentTags = searchParams.getAll("tag");
+    const currentTypes = displayParams.getAll("type");
+    const currentTags = displayParams.getAll("tag");
 
     const hasFilters = currentTypes.length > 0 || currentTags.length > 0;
-    const q = searchParams.get("q") || "";
+    const q = displayParams.get("q") || "";
 
     return (
         <aside className={`w-64 shrink-0 space-y-8 py-8 ${className}`}>
@@ -56,7 +66,7 @@ export function Sidebar({ className = "" }: { className?: string }) {
                         <Form onChange={handleFilterChange} className="space-y-2">
                             {/* Preserve existing searches/tags when changing type */}
                             {currentTags.map(t => <input key={t} type="hidden" name="tag" value={t} />)}
-                            <input type="hidden" name="q" value={searchParams.get("q") || ""} />
+                            <input type="hidden" name="q" value={q} />
 
                             {RESOURCE_FILTERS.map((filter) => {
                                 const isChecked = currentTypes.includes(filter.value);
@@ -64,11 +74,11 @@ export function Sidebar({ className = "" }: { className?: string }) {
                                     <label key={filter.value} className="flex items-center gap-2 cursor-pointer group">
                                         <div className="relative flex items-center">
                                             <input
-                                                key={`${filter.value}-${isChecked}`} // Force re-mount on state change to respect defaultChecked
                                                 type="checkbox"
                                                 name="type"
                                                 value={filter.value}
-                                                defaultChecked={isChecked}
+                                                checked={isChecked}
+                                                onChange={() => { }} // Controlled by displayParams
                                                 className="peer h-4 w-4 appearance-none rounded border border-gray-300 checked:bg-black checked:border-black transition-all"
                                             />
                                             <svg
@@ -90,17 +100,14 @@ export function Sidebar({ className = "" }: { className?: string }) {
 
             <div>
                 <h4 className="text-sm font-medium text-gray-500 mb-2">Tags</h4>
-                {/* For tags, we might want individual toggles. Using a Form for simplicity involves logic to add/remove. 
-             A simpler approach for 'links' style tags: */}
                 <div className="flex flex-wrap gap-2">
                     {TAGS.map((tag) => {
                         const isActive = currentTags.includes(tag);
-                        // Logic to toggle: if active, remove from new URL. If inactive, add.
                         const newTags = isActive
                             ? currentTags.filter(t => t !== tag)
                             : [...currentTags, tag];
 
-                        const params = new URLSearchParams(searchParams);
+                        const params = new URLSearchParams(displayParams);
                         params.delete("tag");
                         newTags.forEach(t => params.append("tag", t));
 
